@@ -183,8 +183,7 @@ determineBlocks <- function( matrix, silent=F){
 		cat("nb: This expects a table in species (rows) by samples (columns).\n");		
 	}
 
-	blocks <- as.matrix(read.table("/Volumes/projects/thaliana/microbes/data/original/thaliana/blocks.txt",
-					header=T, sep="\t", as.is=T, stringsAsFactors=FALSE));
+	blocks <- as.matrix(read.table(paste0(Sys.getenv('ROOT_MICROBIOME_DIR'), "data/blocks.txt"), header=T, sep="\t", as.is=T, stringsAsFactors=FALSE));
 	
 	plates <- determinePlates(matrix, silent=TRUE);
 	
@@ -209,7 +208,7 @@ determineBlocks <- function( matrix, silent=F){
 	if( length(indices) > 0 ){
 		
 		sampleNames <- blocks[indices, "sample_id"];
-		lastlines <- read.table("/Volumes/projects/thaliana/microbes/data/original/thaliana/last.lines.covariates.txt",header=T,sep="\t",as.is=T);
+		lastlines <- read.table( paste0(Sys.getenv('ROOT_MICROBIOME_DIR'), "data/last.lines.covariates.txt"), header=T, sep="\t", as.is=T );
 		
 		for( sample_i in 1:length(sampleNames)){
 			name <- sampleNames[sample_i];
@@ -406,10 +405,10 @@ rarefyTable <- function(samples, sampleSize, nperm=1){
 openLeafRootAlignmentFile <- function( marker ){
 	
 	if( marker == "ITS" ){
-		combinedTissueFileName <- paste("/Volumes/projects/thaliana/microbes/data/original/thaliana/ITS/plateOrder/fungi.combined.tissue.txt", sep="");
+		combinedTissueFileName <- paste0( Sys.getenv('ROOT_MICROBIOME_DIR'), "data/ITS/fungi.combined.tissue.txt" );
 		
 	} else {
-		combinedTissueFileName <- paste("/Volumes/projects/thaliana/microbes/data/original/thaliana/16S/plateOrder/bacteria.combined.tissue.txt", sep="");
+		combinedTissueFileName <- paste0( Sys.getenv('ROOT_MICROBIOME_DIR'), "data/16S/bacteria.combined.tissue.txt" );
 	}
 	
 	alignmentFile <- read.table(combinedTissueFileName, header=T, sep="\t", as.is=T, stringsAsFactors=FALSE);
@@ -596,10 +595,10 @@ getData <- function(cutoff, marker="16S", combined=FALSE, tissue="root", minRead
 	match.arg( tissue, c("leaf", "root", "all"));
 
 	if( combined ){
-		otuTable <- paste0( "/Volumes/projects/thaliana/microbes/data/original/thaliana/", marker, "/total/otus", cutoff, "/picked_otus", cutoff, "/all_tissue.otus.final.txt" );
+		otuTable <- paste0( Sys.getenv('ROOT_MICROBIOME_DIR'), "data/", marker, "/total/otus", cutoff, "/picked_otus", cutoff, "/all_tissue.otus.final.txt" );
 
 	} else {
-		otuTable <- paste0( "/Volumes/projects/thaliana/microbes/data/original/thaliana/", marker, "/", tissue, "/otus", cutoff, "/picked_otus", cutoff, "/sep_tissue.otus.final.2.txt" );
+		otuTable <- paste0( Sys.getenv('ROOT_MICROBIOME_DIR'), "data/", marker, "/", tissue, "/otus", cutoff, "/picked_otus", cutoff, "/sep_tissue.otus.final.2.txt" );
 	}
 
 	cat("Core file:", otuTable, "\n");
@@ -651,7 +650,7 @@ getData <- function(cutoff, marker="16S", combined=FALSE, tissue="root", minRead
 			cat("Please note that rarefaction will be done using:", numberOfRarefactions, "permutation(s).\n");
 
 			## if necessary, create the output directory.
-			if( !dir.exists(dirname(filenamePrefix))){
+			if( !dir.exists( dirname(filenamePrefix)) ){
 				cat("Now creating the directory for the 'rarefied' robjects.\n");
 				dir.create( dirname(filenamePrefix) ); 
 			}
@@ -728,7 +727,7 @@ writePhenoAndBlockFile <- function( matrix, fileNamePrefix, transformation ){
 		colnames(phenotypes)[1] <-  name # we lost the name of the phenotypes!
 		
 	} else {
-		cat("That don't make no sense pa.\n");
+		cat("That doesn't make sense.\n");
 	}
 	
 	matrix.new <- data.frame(phenotype_id=c(),phenotype_name=c(),ecotype_id=c(),value=c(),replicate_id=c());
@@ -762,45 +761,4 @@ writePhenoAndBlockFile <- function( matrix, fileNamePrefix, transformation ){
 	return(c(fileName, blockFileName));
 }
 
-################################################################################
-## March 24, 2017
-## handle the ecotype-metadata file.
-################################################################################
-openAccessionFile <- function(fileName, latitudeBoundaries=c(-90, 90), longitudeBoundaries=c(-180, 180)){
-	
-	accessionFile <- read.table(fileName, header=T, sep="\t", as.is=T, stringsAsFactors=FALSE, quote='', na.strings=c("NA", "null"));
-	accessionFile[,"latitude"] <- as.numeric(accessionFile[,"latitude"]);
-	accessionFile[,"longitude"] <- as.numeric(accessionFile[,"longitude"]);
-
-	if( length(which(is.na(accessionFile[,"latitude"]) | is.na(accessionFile[,"longitude"]))) > 0 ){
-		cat("Removing lat/long dropouts.\n");
-		omissions <- unique(which(is.na(accessionFile[,"latitude"]) | is.na(accessionFile[,"longitude"])));
-		accessionFile <- accessionFile[-omissions,];
-	}
-	
-	stopifnot( length(latitudeBoundaries) == 2 );
-	stopifnot( length(longitudeBoundaries) == 2 );
-	
-	accessionFile <- accessionFile[which(accessionFile[,"latitude"] >= min(latitudeBoundaries) & accessionFile[,"latitude"] <= max(latitudeBoundaries)),]
-	accessionFile <- accessionFile[which(accessionFile[,"longitude"] >= min(longitudeBoundaries) & accessionFile[,"longitude"] <= max(longitudeBoundaries)),]
-	cat("Returning:", nrow(accessionFile), "that fit the lat/long specifications.\n");
-	return(list("lines"=accessionFile, "filename"=fileName));
-}
-
-getAccessionInfo <- function(ecotypeIds=NULL, omitCol=TRUE){
-	## provide accession information
-	accessions <- "/Volumes/projects/thaliana/the_accessions/all_ecotypes.txt";
-	accessions <- openAccessionFile(accessions)$lines;
-
-	if( !is.null(ecotypeIds)){
-		accessions <- subset(accessions, ecotype_id %in% ecotypeIds );
-		cat("Subsetted to:", length(unique(accessions[,"ecotype_id"])), "unique accessions.\n");
-	}
-
-	if( omitCol ){
-		accessions <- subset(accessions, ecotype_id != 6909 | name != "Col-0");
-	}
-
-	return(accessions);
-}
 
