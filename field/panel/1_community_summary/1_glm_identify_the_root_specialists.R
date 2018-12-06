@@ -6,15 +6,15 @@
 
 rm(list=ls());
 
-source("/Volumes/projects/thaliana/code/hdr.microbiome_methods.R");
-source("/Volumes/projects/code/hdr.base_methods.R");
+source(paste0(Sys.getenv('ROOT_MICROBIOME_DIR'), "/code/hdr.microbiome_methods.R"));
+source(paste0(Sys.getenv('ROOT_MICROBIOME_DIR'), "/code/hdr.base_methods.R"));
 
 #####################################################################################################################
 ## parameters
 #####################################################################################################################
 otuCutoff <- 97;
 otuThreshold <- 2; ## eliminate singletons if you want... nb: this is really only valid for values of 1 or 2, given the way we treat it as a boolean below...
-phylogeneticTarget <- "ITS"; ## one of either 16S or ITS
+phylogeneticTarget <- "16S"; ## one of either 16S or ITS
 minReads <- 1;
 minimumSumEitherOrgan <- 1000;
 
@@ -60,7 +60,7 @@ minimumSumEitherOrgan <- 1000;
 	rownames(root.taxa) <- root.taxa[,1];
 
 	#####################################################################################################################
-	## threshold OTUs/ASVs based on 
+	## threshold OTUs/ASVs based on user parameter
 	#####################################################################################################################
 	leaf.data <- applyThreshold( leaf.data, otuThreshold );
 	root.data <- applyThreshold( root.data, otuThreshold );
@@ -137,7 +137,13 @@ minimumSumEitherOrgan <- 1000;
 		results <- rbind( results, taxonomicResults);
 	}
 
-	setwd("/Users/mhorto/Google Drive/Horton_lab/thaliana/projects/root_metagenomics/tables/taxonomic_differences/");
+	outputDirectory <- paste0(Sys.getenv('ROOT_MICROBIOME_DIR'), "/taxonomic_differences/");
+	if( !dir.exists(outputDirectory)){
+		cat("Creating output directory:", outputDirectory, "\n");
+		dir.create(outputDirectory);
+	}
+
+	setwd(outputDirectory);
 	outputFileName <- paste("taxonomy_vs_organ.", minReads, ".", phylogeneticTarget, ".", minReads, ".tn", otuThreshold, ".min_one_organ", minimumSumEitherOrgan, ".txt", sep="");
 	write.table(results, outputFileName, quote=F, sep="\t", row.names=F);
 }
