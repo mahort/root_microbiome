@@ -57,6 +57,32 @@ getBlups <- function(kingdom, analyticalMethod, speciesMatrix, speciesMatrixOffs
 	return(speciesMatrixWideFormat)
 }
 
+## using the default arguments, this function converts all of the values in a matrix to the positive set.
+getDistanceMatrix <- function( dataMatrix, method, positivity=TRUE ){
+
+	require(vegan); 
+
+	if( positivity ){
+		cat("Scaling distance matrix to positive numbers.\n");
+		dataMatrix <- apply( dataMatrix, 2, function(x){ x + (abs(min(x)) + 1); });
+	}
+
+	if( method == "chord" ){
+		distanceMatrix <- vegdist( decostand(dataMatrix, "norm"), method="euclidean");
+
+	} else if( method == "squaredEuclidean" ){
+		distanceMatrix <- vegdist( dataMatrix, method="euclidean")^2;
+
+	} else if( method == "chi.square" ){
+		distanceMatrix <- vegdist( decostand( dataMatrix, "chi.square"), method="euclidean"); 
+
+	} else {
+		distanceMatrix <- vegdist( dataMatrix, method=method)
+	}
+
+	return(distanceMatrix);
+}
+
 ############################################################################################################################################
 ## glm based r2
 ############################################################################################################################################
