@@ -52,7 +52,7 @@ setwd(paste0(Sys.getenv('ROOT_MICROBIOME_DIR'), "structure/", organ, "/otus", ot
 
 		fileName <- chooseFile(c(paste0(organ, ".", minimumNumberOfReads), suffixMatch, "\\.txt$")); ## maybe choose this?
 		fileName <- fileName$filename;
-		centrality <- read.table(fileName, header=T, sep="\t", row.names=1); ## alt: sort the rhoThresholds, but this forces this to be clean & clear
+		centrality <- read.table(fileName, header=T, sep="\t", row.names=1); ## 
 
 		###############################################################################
 		## we know the centrality of every node... so now
@@ -72,7 +72,7 @@ setwd(paste0(Sys.getenv('ROOT_MICROBIOME_DIR'), "structure/", organ, "/otus", ot
 
 		dev.off();
 
-		## the results from the following code indicate that - among the most heavily sequenced taxa - the fungi have, on average, more keystone/effectual taxa than the bacteria do
+		## here we test whether or not - among the most heavily sequenced taxa - the fungi have more 'central' taxa than the bacteria do
 		for( m in 1:length(measures)){
 			measure_m <- measures[m];
 			cat("--------------------------------------\n");
