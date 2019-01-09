@@ -1,10 +1,4 @@
-## This R-script plots the following metrics:
-## 1.) degree
-## 2.) betweenness
-## 3.) eigenvector centrality
-## 4.) closeness
-##
-## as an igraph layout (davidson-harel)
+## This R-script plots the network, using igraph, in a davidson-harel layout.
 ## 
 ## Author: matt.horton
 ###############################################################################
