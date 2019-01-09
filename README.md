@@ -9,7 +9,7 @@ This package contains R-scripts for analyzing the root microbiome data described
 
 The code requires the environmental variable 'ROOT_MICROBIOME_DIR' to be set. For example, to point to the data and code stored in the root_microbes.tgz file, one could extract it and then execute the bash command:
 
-***export*** ROOT_MICROBIOME_DIR='/Volumes/projects/root_microbes/'
+***export ROOT_MICROBIOME_DIR='<your_directory>/root_microbes/'***
 
 Thanks,
 Matt
