@@ -18,7 +18,7 @@ To avoid using hardcoded paths, we use R's ability to load environmental variabl
 The variables that need to be loaded, by the user, can be done so using the following bash code:
 
 ```console
-*export ROOT_MICROBIOME_DIR='<your_directory>/root_microbes/'*
+export ROOT_MICROBIOME_DIR='<your_directory>/root_microbes/'
 ```
 
 Thanks,
